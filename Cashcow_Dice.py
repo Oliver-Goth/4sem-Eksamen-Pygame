@@ -65,5 +65,5 @@ def display_dice(center_x, center_y):
     else:
         screen.blit(dice_img6, dice2_pos)
 
-    type_text(f"Dice Value: {dice_value}", text_font, (255, 255, 255), center_x - 60, center_y + 110)
+    type_text(f"Dice Value: {dice_value}", text_font, (0, 0, 0), center_x - 60, center_y + 110)
     pygame.display.update()

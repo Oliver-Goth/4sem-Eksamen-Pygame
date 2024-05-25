@@ -140,10 +140,13 @@ def draw_board():
 
 # Initialize player
 player_pos = 0
-player_color = (255, 0, 0)  # Red color for the player token
+player_color = (0, 0, 255)  # Red color for the player token
 
 def draw_player():
     player_pixel_pos = pixel_positions[player_pos]
+    # Draw the black outline circle
+    pygame.draw.circle(screen, BLACK, (player_pixel_pos[0] + CELL_WIDTH // 2, player_pixel_pos[1] + CELL_HEIGHT // 2), CELL_WIDTH // 4 + 2)
+    # Draw the player circle
     pygame.draw.circle(screen, player_color, (player_pixel_pos[0] + CELL_WIDTH // 2, player_pixel_pos[1] + CELL_HEIGHT // 2), CELL_WIDTH // 4)
 
 def move_player(steps):
