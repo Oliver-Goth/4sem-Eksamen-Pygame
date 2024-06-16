@@ -1,19 +1,16 @@
 import pygame
 import sys
-import time
+import math
 from Cashcow_Dice import dice_roll, display_dice
 
-# Initialize Pygame
 pygame.init()
 
-# Constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 1500, 1000
 CELL_WIDTH, CELL_HEIGHT = 100, 100
-BOARD_COLOR = (232, 228, 214)
+BOARD_COLOR = (255, 245, 196)
 LINE_COLOR = (0, 0, 0)
 FPS = 30
 
-# Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -21,8 +18,11 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 215, 0)
 PURPLE = (128, 0, 128)
+ORANGE = (255, 165, 0)
 
-# Cell names and colors (mock names for illustration)
+rolling_audio = pygame.mixer.Sound('audio/roll_audio.mp3')
+rolling_stop_audio = pygame.mixer.Sound('audio/roll_stop_audio.mp3')
+
 cell_data = [
     ("Cashflow Day", YELLOW),
     # Top Beginning
@@ -74,11 +74,9 @@ cell_data = [
     # Left End
 ]
 
-# Screen setup
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Board game")
 
-# Define the positions of each cell on the Monopoly board
 cell_positions = [
     (0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0), (8, 0), (9, 0), (10, 0), (11, 0), (12, 0),
     (12, 1),
@@ -98,25 +96,70 @@ cell_positions = [
     (0, 1)
 ]
 
-# Calculate the starting position to center the board
 board_width = 13 * CELL_WIDTH
 board_height = 9 * CELL_HEIGHT
 start_x = (SCREEN_WIDTH - board_width) // 2
 start_y = (SCREEN_HEIGHT - board_height) // 2
 
-# Calculate the actual pixel positions
-pixel_positions = [(start_x + x * CELL_WIDTH, start_y + y * CELL_HEIGHT) for x, y in cell_positions]
+rectangular_positions = [(start_x + x * CELL_WIDTH, start_y + y * CELL_HEIGHT) for x, y in cell_positions]
+
+def generate_circular_positions(center_x, center_y, radius, num_cells):
+    angle_step = 2 * math.pi / num_cells
+    return [
+        (
+            int(center_x + radius * math.cos(i * angle_step) - CELL_WIDTH // 2),
+            int(center_y + radius * math.sin(i * angle_step) - CELL_HEIGHT // 2)
+        )
+        for i in range(num_cells)
+    ]
+
+center_x, center_y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
+radius = 3 * CELL_WIDTH
+
+circular_positions = generate_circular_positions(center_x, center_y, radius, 20)
+
+circular_cell_data = [
+    ("Market", BLUE),
+    ("Deals", GREEN),
+    ("Doodad", RED),
+    ("Deals", GREEN),
+    ("Baby", PURPLE),
+    ("Deals", GREEN),
+    ("Payday", ORANGE),
+    ("Deals", GREEN),
+    ("Legal Fees", RED),
+    ("Deals", GREEN),
+    ("Market", BLUE),
+    ("Deals", GREEN),
+    ("Doodad", RED),
+    ("Deals", GREEN),
+    ("Charity", PURPLE),
+    ("Deals", GREEN),
+    ("Payday", ORANGE),
+    ("Deals", GREEN),
+    ("Legal Fees", RED),
+    ("Deals", GREEN),
+    ("Market", BLUE),
+    ("Deals", GREEN),
+    ("Doodad", RED),
+    ("Deals", GREEN),
+    ("Downsized", PURPLE),
+    ("Deals", GREEN),
+    ("Payday", ORANGE),
+    ("Deals", GREEN),
+    ("Legal Fees", RED),
+    ("Deals", GREEN)
+]
 
 def draw_board():
     screen.fill(BOARD_COLOR)
     font = pygame.font.SysFont(None, 24)
     
-    for idx, pos in enumerate(pixel_positions):
+    for idx, pos in enumerate(rectangular_positions):
         name, color = cell_data[idx]
         pygame.draw.rect(screen, color, (*pos, CELL_WIDTH, CELL_HEIGHT))
         pygame.draw.rect(screen, LINE_COLOR, (*pos, CELL_WIDTH, CELL_HEIGHT), 2)
 
-        # Draw the cell name, breaking text into multiple lines if necessary
         words = name.split()
         lines = []
         current_line = words[0]
@@ -130,7 +173,6 @@ def draw_board():
                 current_line = test_line
         lines.append(current_line)
         
-        # Render each line of text
         y_offset = (CELL_HEIGHT - len(lines) * font.get_height()) / 2
         for line in lines:
             text = font.render(line, True, LINE_COLOR)
@@ -138,23 +180,61 @@ def draw_board():
             screen.blit(text, text_rect)
             y_offset += font.get_height()
 
-# Initialize player
+    for idx, pos in enumerate(circular_positions):
+        name, color = circular_cell_data[idx]
+        pygame.draw.rect(screen, color, (*pos, CELL_WIDTH, CELL_HEIGHT))
+        pygame.draw.rect(screen, LINE_COLOR, (*pos, CELL_WIDTH, CELL_HEIGHT), 2)
+
+        words = name.split()
+        lines = []
+        current_line = words[0]
+        
+        for word in words[1:]:
+            test_line = current_line + " " + word
+            if font.size(test_line)[0] > CELL_WIDTH - 10:
+                lines.append(current_line)
+                current_line = word
+            else:
+                current_line = test_line
+        lines.append(current_line)
+        
+        y_offset = (CELL_HEIGHT - len(lines) * font.get_height()) / 2
+        for line in lines:
+            text = font.render(line, True, LINE_COLOR)
+            text_rect = text.get_rect(center=(pos[0] + CELL_WIDTH / 2, pos[1] + y_offset + font.get_height() / 2))
+            screen.blit(text, text_rect)
+            y_offset += font.get_height()
+
 player_pos = 0
-player_color = (0, 0, 255)  # Red color for the player token
+player_track = 'circular'
+player_color = (0, 0, 255)
 
 def draw_player():
-    player_pixel_pos = pixel_positions[player_pos]
-    # Draw the black outline circle
-    pygame.draw.circle(screen, BLACK, (player_pixel_pos[0] + CELL_WIDTH // 2, player_pixel_pos[1] + CELL_HEIGHT // 2), CELL_WIDTH // 4 + 2)
-    # Draw the player circle
-    pygame.draw.circle(screen, player_color, (player_pixel_pos[0] + CELL_WIDTH // 2, player_pixel_pos[1] + CELL_HEIGHT // 2), CELL_WIDTH // 4)
+    if player_track == 'circular':
+        player_rectangular_pos = circular_positions[player_pos]
+    else:
+        player_rectangular_pos = rectangular_positions[player_pos]
+        
+    pygame.draw.circle(screen, BLACK, (player_rectangular_pos[0] + CELL_WIDTH // 2, player_rectangular_pos[1] + CELL_HEIGHT // 2), CELL_WIDTH // 4 + 2)
+    pygame.draw.circle(screen, player_color, (player_rectangular_pos[0] + CELL_WIDTH // 2, player_rectangular_pos[1] + CELL_HEIGHT // 2), CELL_WIDTH // 4)
 
 def move_player(steps):
-    global player_pos
-    player_pos = (player_pos + steps) % len(pixel_positions)
+    global player_pos, player_track
+    
+    if player_track == 'circular':
+        player_pos = (player_pos + steps) % len(circular_positions)
+    else:
+        player_pos = (player_pos + steps) % len(rectangular_positions)
+
+def draw_button(surface, color, rect):
+    pygame.draw.rect(surface, color, rect)
 
 def main():
+    global player_track
+    
     clock = pygame.time.Clock()
+
+    dice_value, dice1 = dice_roll()
 
     while True:
         for event in pygame.event.get():
@@ -163,17 +243,26 @@ def main():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    dice_value, dice1, dice2 = dice_roll()
-                    draw_board()
-                    display_dice(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-                    pygame.display.update()
-                    time.sleep(1)  # Delay before moving the player
+                    rolling_audio.play()
+                    dice_value, dice1 = dice_roll()
                     move_player(dice_value)
-
+                    rolling_stop_audio.play()
+                if event.key == pygame.K_t:
+                    if player_track == 'rectangular':
+                        player_pos = 0
+                        player_track = 'circular'
+                    elif player_track == 'circular':
+                        player_pos = 0
+                        player_track = 'rectangular'
+                        
+        screen.fill(BOARD_COLOR)
         draw_board()
         draw_player()
+        display_dice(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        
         pygame.display.flip()
         clock.tick(FPS)
+
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,6 @@
 import pygame
 import sys
 
-# Initialize Pygame
 pygame.init()
 
 # Constants
@@ -16,11 +15,9 @@ BLACK = (0, 0, 0)
 GRAY = (200, 200, 200)
 LIGHT_GRAY = (220, 220, 220)
 
-# Screen setup
+# Setup
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Cashcow Menu")
-
-# Font setup
 font = pygame.font.SysFont(None, 36)
 
 def draw_button():
@@ -30,11 +27,11 @@ def draw_button():
     screen.blit(text, text_rect)
 
 def draw_menu():
-    pygame.draw.rect(screen, LIGHT_GRAY, (0, 0, MENU_WIDTH, MENU_HEIGHT))
-    menu_items = ["Item 1", "Item 2", "Item 3", "Item 4"]
+    pygame.draw.rect(screen, LIGHT_GRAY, (0, 50, MENU_WIDTH, MENU_HEIGHT))
+    menu_items = ["asdag", "asd", "asd", "asd"]
     for idx, item in enumerate(menu_items):
         text = font.render(item, True, BLACK)
-        text_rect = text.get_rect(topleft=(10, 10 + idx * 40))
+        text_rect = text.get_rect(topleft=(10, 60 + idx * 40))
         screen.blit(text, text_rect)
 
 def main():
