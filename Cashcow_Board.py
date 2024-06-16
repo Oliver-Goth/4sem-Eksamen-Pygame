@@ -229,6 +229,18 @@ def move_player(steps):
 def draw_button(surface, color, rect):
     pygame.draw.rect(surface, color, rect)
 
+def animate_dice_roll():
+    rolling_audio.play()
+    for _ in range(15):  # Adjust the range for the length of the animation
+        dice_value = dice_roll()[0]
+        screen.fill(BOARD_COLOR)
+        draw_board()
+        draw_player()
+        display_dice(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # display_dice only takes 2 arguments
+        pygame.display.flip()
+        pygame.time.delay(30)  # Adjust the delay for the speed of the animation
+    rolling_stop_audio.play()
+
 def main():
     global player_track
     
@@ -243,10 +255,9 @@ def main():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    rolling_audio.play()
+                    animate_dice_roll()
                     dice_value, dice1 = dice_roll()
                     move_player(dice_value)
-                    rolling_stop_audio.play()
                 if event.key == pygame.K_t:
                     if player_track == 'rectangular':
                         player_pos = 0
@@ -258,7 +269,7 @@ def main():
         screen.fill(BOARD_COLOR)
         draw_board()
         draw_player()
-        display_dice(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        display_dice(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # display_dice only takes 2 arguments
         
         pygame.display.flip()
         clock.tick(FPS)
