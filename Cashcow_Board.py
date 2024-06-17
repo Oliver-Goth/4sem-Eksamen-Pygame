@@ -229,16 +229,16 @@ def move_player(steps):
 def draw_button(surface, color, rect):
     pygame.draw.rect(surface, color, rect)
 
-def animate_dice_roll():
+def animated_dice_roll():
     rolling_audio.play()
-    for _ in range(15):  # Adjust the range for the length of the animation
+    for e in range(15):
         dice_value = dice_roll()[0]
         screen.fill(BOARD_COLOR)
         draw_board()
         draw_player()
-        display_dice(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # display_dice only takes 2 arguments
+        display_dice(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         pygame.display.flip()
-        pygame.time.delay(30)  # Adjust the delay for the speed of the animation
+        pygame.time.delay(30)
     rolling_stop_audio.play()
 
 def main():
@@ -255,7 +255,7 @@ def main():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    animate_dice_roll()
+                    animated_dice_roll()
                     dice_value, dice1 = dice_roll()
                     move_player(dice_value)
                 if event.key == pygame.K_t:
@@ -269,7 +269,7 @@ def main():
         screen.fill(BOARD_COLOR)
         draw_board()
         draw_player()
-        display_dice(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # display_dice only takes 2 arguments
+        display_dice(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         
         pygame.display.flip()
         clock.tick(FPS)

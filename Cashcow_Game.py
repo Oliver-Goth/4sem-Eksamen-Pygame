@@ -1,6 +1,5 @@
 import pygame
 import Cashcow_Board
-import Cashcow_BoardCircular
 from Cashcow_Dice import dice_roll, display_dice
 
 pygame.init()
